@@ -3,10 +3,20 @@ const cors = require('cors');
 const app = express();
 const port = 7000;
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-
+require ("dotenv").config()
 app.use(cors());
 app.use(express.json());
-const uri = "mongodb+srv://health-tracker:GJSDuCiXTKaKIPjd@cluster0.hlqh8iv.mongodb.net/?appName=Cluster0";
+
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./serviceKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+
+const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@cluster0.hlqh8iv.mongodb.net/?appName=Cluster0`;
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -14,6 +24,23 @@ const client = new MongoClient(uri, {
     deprecationErrors: true,
   }
 });
+
+const middleware =async (req,res,next)=>{
+ const authorization= req.headers.authorization
+  const token =authorization.split(' ')[1]
+
+
+  try{
+     await admin.auth().verifyIdToken(token)
+       next()
+  }
+  catch(error){
+    res.status(401).send({
+      message:"unauthorised access."
+    })
+  }
+
+}
 
 async function run() {
   try {
@@ -32,7 +59,7 @@ async function run() {
         console.log(result);
         res.send(result);
     });
-    app.get('/addHabit/:id', async (req, res) => {
+    app.get('/addHabit/:id',middleware, async (req, res) => {
       const { id } = req.params;
       const result = await habitCollection.findOne({ _id: new ObjectId(id) });
       res.send({ success: true, result });
@@ -103,7 +130,7 @@ async function run() {
       }
     });
 
-    await client.db("admin").command({ ping: 1 });
+    //await client.db("admin").command({ ping: 1 });
     console.log("Connected to MongoDB successfully!");
   } finally {
     // client.close();
