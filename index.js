@@ -23,19 +23,30 @@ async function run() {
     await client.connect();
   
     const db=client.db('habit-tracker')
-    const modelCollection=db.collection('AddHabit')
+    const habitCollection=db.collection('AddHabit')
 
     app.get('/addHabit',async(req,res)=>{
-      const result=await modelCollection.find().toArray()
+      const result=await habitCollection.find().toArray()
       res.send(result)
+    })
+
+    app.get('/addHabit/:id',async (req,res)=>{
+      const id=req.params
+      console.log(id);
+
+      res.send({
+        success:true,
+      })
     })
 
     app.post('/addHabit', async (req, res) => { 
       const habitData = req.body;
-      const result = await modelCollection.insertOne(habitData);
+      const result = await habitCollection.insertOne(habitData);
       console.log('Habit added:', result);
       res.send(result);
     });
+
+
 
 
     await client.db("admin").command({ ping: 1 });
