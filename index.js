@@ -1,14 +1,14 @@
 const express = require('express')
 const cors=require('cors');
 const app = express()
-const port = 5000
+const port = 7000
 const { MongoClient, ServerApiVersion } = require('mongodb');
 
 app.use(cors());
 app.use(express.json());
 
 
-const uri = "mongodb+srv://health-tracker:w3cN4bTdcOF3tVVM@cluster0.hlqh8iv.mongodb.net/?appName=Cluster0";
+const uri = "mongodb+srv://health-tracker:GJSDuCiXTKaKIPjd@cluster0.hlqh8iv.mongodb.net/?appName=Cluster0";
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -25,10 +25,17 @@ async function run() {
     const db=client.db('habit-tracker')
     const modelCollection=db.collection('AddHabit')
 
-    app.get('/AddHabit',async(req,res)=>{
+    app.get('/addHabit',async(req,res)=>{
       const result=await modelCollection.find().toArray()
       res.send(result)
     })
+
+    app.post('/addHabit', async (req, res) => { 
+      const habitData = req.body;
+      const result = await modelCollection.insertOne(habitData);
+      console.log('Habit added:', result);
+      res.send(result);
+    });
 
 
     await client.db("admin").command({ ping: 1 });
