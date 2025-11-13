@@ -2,7 +2,7 @@ const express = require('express')
 const cors=require('cors');
 const app = express()
 const port = 7000
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 app.use(cors());
 app.use(express.json());
@@ -33,9 +33,11 @@ async function run() {
     app.get('/addHabit/:id',async (req,res)=>{
       const {id}=req.params
       console.log(id);
+      const result =await habitCollection.findOne({_id: new ObjectId (id)})
 
       res.send({
         success:true,
+        result
       })
     })
 
