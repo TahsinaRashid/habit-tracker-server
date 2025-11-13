@@ -44,7 +44,7 @@ const middleware =async (req,res,next)=>{
 
 async function run() {
   try {
-    await client.connect();
+    //await client.connect();
     const db = client.db('habit-tracker');
     const habitCollection = db.collection('AddHabit');
     app.get('/addHabit', async (req, res) => {
